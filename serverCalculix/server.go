@@ -17,14 +17,27 @@ var ccxExecutionLocation []string
 func init() {
 	modelName = "model"
 
+	// allowable locations of ccx
 	ccxExecutionLocation = append(ccxExecutionLocation, "ccx")
 }
 
 // Calculix - general type
-type Calculix int
+type Calculix struct {
+	// amount tasks calculated at one moment is equal amount of real processors
+	amountTasks int
+}
+
+// AmountTasks - amount allowable tasks to sending for calculation
+func (c *Calculix) AmountTasks(empty string, amountFreeTasks *int) error {
+	_ = empty
+	amountFreeTasks = &c.amountTasks
+	return nil
+}
 
 // ExecuteForDat - calculute by Calculix and return body of .dat file
-func (c *Calculix) ExecuteForDat(inpFileBody *string, datFileBody *string) error {
+func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *[]string) error {
+	c.amountTasks--
+	defer func() { c.amountTasks++ }()
 	// create temp folder
 	dir, err := c.createNewTempDir()
 	if err != nil {
@@ -34,7 +47,7 @@ func (c *Calculix) ExecuteForDat(inpFileBody *string, datFileBody *string) error
 	inpFilename := modelName + ".inp"
 	file := dir + string(filepath.Separator) + inpFilename
 
-	err = ioutil.WriteFile(file, []byte(*inpFileBody), 0777)
+	err = ioutil.WriteFile(file, []byte(inpFileBody), 0777)
 	if err != nil {
 		return fmt.Errorf("Cannot write to inp file: %v", err)
 	}
@@ -74,7 +87,7 @@ func (c *Calculix) createNewTempDir() (dir string, err error) {
 	return "", fmt.Errorf("Cannot create temp folder: %v", err)
 }
 
-func (c *Calculix) getDatFileBody(dir string) (datBody *string, err error) {
+func (c *Calculix) getDatFileBody(dir string) (datBody *[]string, err error) {
 	file := dir + string(filepath.Separator) + modelName + ".dat"
 	if strings.ToUpper(file[len(file)-3:]) != "DAT" {
 		return datBody, fmt.Errorf("Wrong filename : %v", file)
@@ -100,45 +113,13 @@ func (c *Calculix) getDatFileBody(dir string) (datBody *string, err error) {
 	}()
 	scanner := bufio.NewScanner(inFile)
 	scanner.Split(bufio.ScanLines)
-	var buffer string
 	for scanner.Scan() {
-		buffer = buffer + "\n" + scanner.Text()
+		*datBody = append(*datBody, scanner.Text())
 	}
-	return &buffer, nil
+	return datBody, nil
 }
 
 /*
-func createResearchFilename(researchName string, file string) (fileName string, err error) {
-	fileName = "." + string(filepath.Separator) + researchFolder + string(filepath.Separator) + researchName + string(filepath.Separator) + file
-	if _, err := os.Stat(fileName); os.IsExist(err) {
-		return fileName, err
-	}
-	return fileName, nil
-}
-
-func getBucklingFactor(file string, amountBuckling int) (bucklingFactor []float64, err error) {
-	if strings.ToUpper(file[len(file)-3:]) != "DAT" {
-		return bucklingFactor, fmt.Errorf("Wrong filename : %v", file)
-	}
-	// check file is exist
-	if _, err := os.Stat(file); os.IsNotExist(err) {
-		return bucklingFactor, fmt.Errorf("Cannot find file : %v", err)
-	}
-	// found buckling header
-	inFile, err := os.Open(file)
-	if err != nil {
-		return bucklingFactor, err
-	}
-	defer func() {
-		errFile := inFile.Close()
-		if errFile != nil {
-			if err != nil {
-				err = fmt.Errorf("%v ; %v", err, errFile)
-			} else {
-				err = errFile
-			}
-		}
-	}()
 	scanner := bufio.NewScanner(inFile)
 	scanner.Split(bufio.ScanLines)
 	bucklingHeader := "B U C K L I N G   F A C T O R   O U T P U T"
