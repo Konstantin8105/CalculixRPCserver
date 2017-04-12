@@ -76,6 +76,11 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *[]string) erro
 		if err != nil {
 			return fmt.Errorf("Cannot take .dat file: %v", err)
 		}
+		// remove temp folder
+		err = os.RemoveAll(dir)
+		if err != nil {
+			return fmt.Errorf("Cannot remove folder: %v", err)
+		}
 		return nil
 	}
 	return fmt.Errorf("Cannot found ccx")
