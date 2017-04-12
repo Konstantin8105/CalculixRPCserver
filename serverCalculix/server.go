@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -25,6 +26,13 @@ func init() {
 type Calculix struct {
 	// amount tasks calculated at one moment is equal amount of real processors
 	amountTasks int
+}
+
+// NewCalculix - constructor for Calculix
+func NewCalculix() *Calculix {
+	calculix := new(Calculix)
+	calculix.amountTasks = runtime.GOMAXPROCS(runtime.NumCPU())
+	return calculix
 }
 
 // AmountTasks - amount allowable tasks to sending for calculation

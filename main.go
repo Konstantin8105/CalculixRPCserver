@@ -12,7 +12,7 @@ import (
 
 // example of calculix RPC server
 func main() {
-	calculix := new(serverCalculix.Calculix)
+	calculix := serverCalculix.NewCalculix()
 	err := rpc.Register(calculix)
 	if err != nil {
 		fmt.Println("Cannot register the calculix")
