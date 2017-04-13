@@ -1,5 +1,6 @@
 package serverCalculix
 
+// RemoveDuplicates - remove dublicates from string slice
 func RemoveDuplicates(xs *[]string) {
 	found := make(map[string]bool)
 	j := 0

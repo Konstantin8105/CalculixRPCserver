@@ -28,6 +28,7 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *[]string) erro
 	}()
 
 	// create inp file
+	//TODO: add creating file
 	inpFilename := modelName + ".inp"
 	file := dir + string(filepath.Separator) + inpFilename
 
