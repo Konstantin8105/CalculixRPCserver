@@ -6,15 +6,17 @@ import (
 	"runtime"
 )
 
-var modelName string
+const (
+	modelName string = "model"
+)
 
+// allowable locations of ccx
 var ccxExecutionLocation []string
 
 func init() {
-	modelName = "model"
-
-	// allowable locations of ccx
-	ccxExecutionLocation = append(ccxExecutionLocation, "ccx")
+	ccxExecutionLocation = []string{
+		"ccx",
+	}
 }
 
 // Calculix - general type
