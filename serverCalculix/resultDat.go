@@ -3,17 +3,37 @@ package serverCalculix
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
+)
+
+// DatBody - body of dat file
+type DatBody struct {
+	A string
+}
+
+// ErrorServerBusy - system error of server
+const (
+	ErrorServerBusy string = "Server is busy"
 )
 
 // ExecuteForDat - calculute by Calculix and return body of .dat file
-func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *[]string) error {
+func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error {
+
+	var mutex = &sync.Mutex{}
+	mutex.Lock()
+
 	c.amountTasks--
 	defer func() { c.amountTasks++ }()
+	if c.amountTasks < 0 {
+		return fmt.Errorf(ErrorServerBusy)
+	}
+
+	mutex.Unlock()
+
 	// create temp folder
 	dir, err := c.createNewTempDir()
 	if err != nil {
@@ -28,14 +48,31 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *[]string) erro
 	}()
 
 	// create inp file
-	//TODO: add creating file
 	inpFilename := modelName + ".inp"
 	file := dir + string(filepath.Separator) + inpFilename
-
-	err = ioutil.WriteFile(file, []byte(inpFileBody), 0777)
-	if err != nil {
-		return fmt.Errorf("Cannot write to inp file: %v", err)
+	// check file is exist
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		// create file
+		newFile, err := os.Create(file)
+		if err != nil {
+			return err
+		}
+		err = newFile.Close()
+		if err != nil {
+			return err
+		}
 	}
+	// open file
+	f, err := os.OpenFile(file, os.O_WRONLY, 0777)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(f, "%v", inpFileBody)
+	err = f.Close()
+	if err != nil {
+		return err
+	}
+
 	// check file is exist
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		return fmt.Errorf("File inp is not exist : %v", err)
@@ -49,16 +86,23 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *[]string) erro
 		if err != nil {
 			return fmt.Errorf("Try install from https://pkgs.org/download/calculix-ccx\nError in calculix execution: %v\n%v", err, out)
 		}
-		datFileBody, err = c.getDatFileBody(dir)
+		b, err := c.getDatFileBody(dir)
 		if err != nil {
 			return fmt.Errorf("Cannot take .dat file: %v", err)
 		}
+
+		var buffer string
+		for _, s := range b {
+			buffer += s + "\n"
+		}
+
+		datFileBody.A = buffer
 		return nil
 	}
 	return fmt.Errorf("Cannot found ccx")
 }
 
-func (c *Calculix) getDatFileBody(dir string) (datBody *[]string, err error) {
+func (c *Calculix) getDatFileBody(dir string) (datBody []string, err error) {
 	file := dir + string(filepath.Separator) + modelName + ".dat"
 	if strings.ToUpper(file[len(file)-3:]) != "DAT" {
 		return datBody, fmt.Errorf("Wrong filename : %v", file)
@@ -85,7 +129,7 @@ func (c *Calculix) getDatFileBody(dir string) (datBody *[]string, err error) {
 	scanner := bufio.NewScanner(inFile)
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
-		*datBody = append(*datBody, scanner.Text())
+		datBody = append(datBody, scanner.Text())
 	}
 	return datBody, nil
 }
