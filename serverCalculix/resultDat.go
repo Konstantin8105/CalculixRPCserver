@@ -62,6 +62,7 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 			return err
 		}
 	}
+
 	// open file
 	f, err := os.OpenFile(file, os.O_WRONLY, 0777)
 	if err != nil {
@@ -77,7 +78,8 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		return fmt.Errorf("File inp is not exist : %v", err)
 	}
-	// try to execute by any ccx
+
+	// try all posibile to execute by any ccx
 	for _, ccx := range ccxExecutionLocation {
 		// remove .INP in filename
 		file = file[:(len(file) - 4)]
