@@ -16,8 +16,10 @@ const (
 // CheckCCX - check ccx is allowable
 func (c *Calculix) CheckCCX(empty string, result *ChechCCXResult) error {
 	for _, ccx := range ccxExecutionLocation {
-		out, err := exec.Command(ccx).Output()
-		if err.Error() == "exit status 201" && string(out) == ccxCorrectAnswer {
+		out, _ := exec.Command(ccx).Output()
+		// That case is not work on windows:
+		// /* err.Error() == "exit status 201" && */
+		if string(out) == ccxCorrectAnswer {
 			result.A = true
 			break
 		}

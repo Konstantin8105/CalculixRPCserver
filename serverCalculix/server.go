@@ -17,6 +17,7 @@ var ccxExecutionLocation []string
 func init() {
 	ccxExecutionLocation = []string{
 		"ccx",
+		"E:\\CalculiX\\bin\\ccx.bat",
 	}
 }
 

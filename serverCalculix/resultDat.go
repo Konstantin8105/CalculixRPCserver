@@ -79,14 +79,16 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 		return fmt.Errorf("File inp is not exist : %v", err)
 	}
 
+	// remove .INP in filename
+	file = file[:(len(file) - 4)]
+
 	// try all posibile to execute by any ccx
 	for _, ccx := range ccxExecutionLocation {
-		// remove .INP in filename
-		file = file[:(len(file) - 4)]
 		// execute
-		out, err := exec.Command(ccx, "-i", file).Output()
+		_, err := exec.Command(ccx, "-i", file).Output()
 		if err != nil {
-			return fmt.Errorf("Try install from https://pkgs.org/download/calculix-ccx\nError in calculix execution: %v\n%v", err, out)
+			continue
+			//return fmt.Errorf("Try install from https://pkgs.org/download/calculix-ccx\nError in calculix execution: %v\n%v", err, out)
 		}
 		b, err := c.getDatFileBody(dir)
 		if err != nil {
