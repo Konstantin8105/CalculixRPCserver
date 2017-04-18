@@ -23,6 +23,10 @@ const (
 // ExecuteForDat - calculute by Calculix and return body of .dat file
 func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error {
 
+	if len(inpFileBody) == 0 {
+		return fmt.Errorf("Input inp file is empty")
+	}
+
 	var mutex = &sync.Mutex{}
 	mutex.Lock()
 
@@ -40,12 +44,14 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 		return err
 	}
 	// remove temp folder
-	defer func() {
-		err2 := os.RemoveAll(dir)
-		if err2 != nil {
-			err = fmt.Errorf("Cannot remove folder: %v. Other: %v", err2, err)
-		}
-	}()
+	/*
+		defer func() {
+			err2 := os.RemoveAll(dir)
+			if err2 != nil {
+				err = fmt.Errorf("Cannot remove folder: %v. Other: %v", err2, err)
+			}
+		}()
+	*/
 
 	// create inp file
 	inpFilename := modelName + ".inp"
@@ -94,6 +100,10 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 		if err != nil {
 			return fmt.Errorf("Cannot take .dat file: %v", err)
 		}
+		if len(lines) == 0 {
+			return fmt.Errorf("Cannot read dat file in temp folder = %v", dir)
+		}
+
 		datFileBody.A = strings.Join(lines, "\n")
 		return nil
 	}
@@ -129,5 +139,6 @@ func (c *Calculix) getDatFileBody(dir string) (datBody []string, err error) {
 	for scanner.Scan() {
 		datBody = append(datBody, scanner.Text())
 	}
+
 	return datBody, nil
 }
