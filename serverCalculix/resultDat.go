@@ -90,17 +90,11 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 			continue
 			//return fmt.Errorf("Try install from https://pkgs.org/download/calculix-ccx\nError in calculix execution: %v\n%v", err, out)
 		}
-		b, err := c.getDatFileBody(dir)
+		lines, err := c.getDatFileBody(dir)
 		if err != nil {
 			return fmt.Errorf("Cannot take .dat file: %v", err)
 		}
-
-		var buffer string
-		for _, s := range b {
-			buffer += s + "\n"
-		}
-
-		datFileBody.A = buffer
+		datFileBody.A = strings.Join(lines, "\n")
 		return nil
 	}
 	return fmt.Errorf("Cannot found ccx")
