@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 )
@@ -44,14 +45,12 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 		return err
 	}
 	// remove temp folder
-	/*
-		defer func() {
-			err2 := os.RemoveAll(dir)
-			if err2 != nil {
-				err = fmt.Errorf("Cannot remove folder: %v. Other: %v", err2, err)
-			}
-		}()
-	*/
+	defer func() {
+		err2 := os.RemoveAll(dir)
+		if err2 != nil {
+			err = fmt.Errorf("Cannot remove folder: %v. Other: %v", err2, err)
+		}
+	}()
 
 	// create inp file
 	inpFilename := modelName + ".inp"
@@ -88,13 +87,18 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 	// remove .INP in filename
 	file = file[:(len(file) - 4)]
 
+	// set amount of processors
+	err = os.Setenv("NUMBER_OF_CPUS", string(runtime.GOMAXPROCS(runtime.NumCPU())))
+	if err != nil {
+		return fmt.Errorf("Cannot set environment for use all CPU by calculix")
+	}
+
 	// try all posibile to execute by any ccx
 	for _, ccx := range ccxExecutionLocation {
 		// execute
 		_, err := exec.Command(ccx, "-i", file).Output()
 		if err != nil {
 			continue
-			//return fmt.Errorf("Try install from https://pkgs.org/download/calculix-ccx\nError in calculix execution: %v\n%v", err, out)
 		}
 		lines, err := c.getDatFileBody(dir)
 		if err != nil {

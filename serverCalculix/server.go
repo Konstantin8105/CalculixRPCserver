@@ -4,15 +4,20 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 )
 
+// name of model by default
 const (
 	modelName string = "model"
 )
 
 // allowable locations of ccx
 var ccxExecutionLocation []string
+
+// max amount tasks
+const (
+	maxAmountTask int = 1
+)
 
 func init() {
 	ccxExecutionLocation = []string{
@@ -30,7 +35,7 @@ type Calculix struct {
 // NewCalculix - constructor for Calculix
 func NewCalculix() *Calculix {
 	calculix := new(Calculix)
-	calculix.amountTasks = runtime.GOMAXPROCS(runtime.NumCPU())
+	calculix.amountTasks = maxAmountTask
 	return calculix
 }
 

@@ -1,7 +1,5 @@
 package serverCalculix
 
-import "runtime"
-
 // Amount - amount
 type Amount struct {
 	A int
@@ -10,7 +8,7 @@ type Amount struct {
 // MaxAllowableTasks - amount allowable tasks to sending for calculation
 func (c *Calculix) MaxAllowableTasks(empty string, amountFreeTasks *Amount) error {
 	_ = empty
-	amountFreeTasks.A = runtime.GOMAXPROCS(runtime.NumCPU())
+	amountFreeTasks.A = maxAmountTask
 	return nil
 }
 
