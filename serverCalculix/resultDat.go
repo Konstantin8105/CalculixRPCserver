@@ -46,9 +46,12 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 	}
 	// remove temp folder
 	defer func() {
-		err2 := os.RemoveAll(dir)
-		if err2 != nil {
-			err = fmt.Errorf("Cannot remove folder: %v. Other: %v", err2, err)
+		// TODO: remove only if calculation haven`t mistakes
+		if err == nil {
+			err2 := os.RemoveAll(dir)
+			if err2 != nil {
+				err = fmt.Errorf("Cannot remove folder: %v. Other: %v", err2, err)
+			}
 		}
 	}()
 
