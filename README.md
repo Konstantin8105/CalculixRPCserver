@@ -8,6 +8,8 @@ RPC server for calculix
 * Used port: 1234
 * Information about server see in browser: (IP):1234/debug/rpc
 * set enviroment: NUMBER_OF_CPUS and amount processors
+* Maximal calculation points for Windows system: 42000
+* For Windows system set "Power Option" - "High Performance"
 
 TODO:
 
@@ -15,6 +17,3 @@ TODO:
 * Show version of Calculix
 * Performance testing server
 * Testing maximum point calculation - classification of computer
-
-* Maximal calculation points for Windows system: 42000
-* For Windows system set "Power Option" - "High Performance"
