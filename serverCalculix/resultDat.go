@@ -53,6 +53,7 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 				err = fmt.Errorf("Cannot remove folder: %v. Other: %v", err2, err)
 			}
 		}
+
 	}()
 
 	// create inp file
@@ -96,11 +97,16 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 		return fmt.Errorf("Cannot set environment for use all CPU by calculix")
 	}
 
+	var summError error
+	var outs []string
+
 	// try all posibile to execute by any ccx
 	for _, ccx := range ccxExecutionLocation {
 		// execute
-		_, err := exec.Command(ccx, "-i", file).Output()
+		out, err := exec.Command(ccx, "-i", file).Output()
 		if err != nil {
+			summError = fmt.Errorf("%v\n%v", err, summError)
+			outs = append(outs, string(out))
 			continue
 		}
 		lines, err := c.getDatFileBody(dir)
@@ -114,7 +120,7 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 		datFileBody.A = strings.Join(lines, "\n")
 		return nil
 	}
-	return fmt.Errorf("Cannot found ccx")
+	return fmt.Errorf("Cannot found ccx %v\nOUT - ", err, strings.Join(outs, "\n"))
 }
 
 func (c *Calculix) getDatFileBody(dir string) (datBody []string, err error) {
