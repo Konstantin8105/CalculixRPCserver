@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"sync"
 )
 
 // DatBody - body of dat file
@@ -28,16 +27,16 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 		return fmt.Errorf("Input inp file is empty")
 	}
 
-	var mutex = &sync.Mutex{}
-	mutex.Lock()
+	c.mutex.Lock()
 
 	c.amountTasks--
-	defer func() { c.amountTasks++ }()
 	if c.amountTasks < 0 {
+		c.amountTasks++
+		c.mutex.Unlock()
 		return fmt.Errorf(ErrorServerBusy)
 	}
-
-	mutex.Unlock()
+	c.mutex.Unlock()
+	defer func() { c.amountTasks++ }()
 
 	// create temp folder
 	dir, err := c.createNewTempDir()
@@ -120,7 +119,7 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 		datFileBody.A = strings.Join(lines, "\n")
 		return nil
 	}
-	return fmt.Errorf("Cannot found ccx %v\nOUT - ", err, strings.Join(outs, "\n"))
+	return fmt.Errorf("Cannot found ccx %v\nOUT - %v", err, strings.Join(outs, "\n"))
 }
 
 func (c *Calculix) getDatFileBody(dir string) (datBody []string, err error) {

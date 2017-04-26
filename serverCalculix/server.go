@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 )
 
 // name of model by default
@@ -13,11 +14,6 @@ const (
 
 // allowable locations of ccx
 var ccxExecutionLocation []string
-
-// max amount tasks
-const (
-	maxAmountTask int = 1
-)
 
 func init() {
 	ccxExecutionLocation = []string{
@@ -31,12 +27,20 @@ func init() {
 type Calculix struct {
 	// amount tasks calculated at one moment is equal amount of real processors
 	amountTasks int
+
+	// max amount tasks
+	maxAmountTask int
+
+	// mutex
+	mutex sync.Mutex
 }
 
 // NewCalculix - constructor for Calculix
 func NewCalculix() *Calculix {
 	calculix := new(Calculix)
-	calculix.amountTasks = maxAmountTask
+	calculix.maxAmountTask = 1
+	calculix.amountTasks = 1
+	calculix.mutex = sync.Mutex{}
 	return calculix
 }
 
