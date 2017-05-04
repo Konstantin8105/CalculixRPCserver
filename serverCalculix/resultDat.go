@@ -27,15 +27,15 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 		return fmt.Errorf("Input inp file is empty")
 	}
 
-	c.mutex.Lock()
+	c.Lock()
 
 	c.amountTasks--
 	if c.amountTasks < 0 {
 		c.amountTasks++
-		c.mutex.Unlock()
+		c.Unlock()
 		return fmt.Errorf(ErrorServerBusy)
 	}
-	c.mutex.Unlock()
+	c.Unlock()
 	defer func() { c.amountTasks++ }()
 
 	// create temp folder
