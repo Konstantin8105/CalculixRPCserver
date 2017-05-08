@@ -32,7 +32,10 @@ type Calculix struct {
 	maxAmountTask int
 
 	// mutex
-	sync.Mutex
+	mutex sync.Mutex
+
+	// server name
+	serverName string
 }
 
 // NewCalculix - constructor for Calculix
@@ -40,7 +43,7 @@ func NewCalculix() *Calculix {
 	calculix := new(Calculix)
 	calculix.maxAmountTask = 1
 	calculix.amountTasks = 1
-	//calculix = sync.Mutex{}
+	calculix.mutex = sync.Mutex{}
 	return calculix
 }
 
