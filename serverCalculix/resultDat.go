@@ -31,6 +31,9 @@ func (c *Calculix) ExecuteForDat(inpFileBody string, datFileBody *DatBody) error
 		return fmt.Errorf(ErrorServerBusy)
 	}
 	c.mutex.Lock()
+	if c.amountTasks <= 0 {
+		return fmt.Errorf(ErrorServerBusy)
+	}
 	c.amountTasks--
 	c.mutex.Unlock()
 	defer func() { c.amountTasks++ }()
